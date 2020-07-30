@@ -15,4 +15,23 @@ class DepController(StoppableThread):
 			if self.stopped():
 				break
 			with apiServer.etcdLock:
-				time.sleep(LOOPTIME)
+				
+				#Check number of pods
+				for deployment in self.apiServer.GetDeployments():
+					replicasRequired = deployment.expectedReplicas - deployment.currentReplicas
+					endpoints = self.apiServer.GetEndPointsByLabel(deployment.deploymentLabel)
+
+					#Delete replicas if there are too many
+					if replicasRequired < 0:
+						replicasToDelete = -replicasRequired
+						
+						for i in range(0, replicasToDelete):
+							#Don't go over the array
+							if i < len(endpoints):
+								endpoints[i].pod.status = "TERMINATING"
+					
+					#Create replicas if there are not enough
+					elif replicasRequired > 0:
+						for i in range(0, replicasRequired):
+							self.apiServer.CreatePod(deployment.deploymentLabel)
+					

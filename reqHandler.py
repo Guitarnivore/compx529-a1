@@ -7,10 +7,10 @@ class ReqHandler(StoppableThread):
 	def __init__(self, APISERVER):
 		Thread.__init__(self)
 		self.apiServer = APISERVER
-		
-	def run:
+
+	def run():
 		while true:
 			if self.stopped():
 				break
 			with apiServer.etcdLock(): #Waits for notification of new request
-                apiServer.etcdLock.wait()
+				apiServer.etcdLock.wait()

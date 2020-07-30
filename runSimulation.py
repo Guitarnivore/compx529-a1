@@ -2,7 +2,7 @@ import threading
 import Request
 import DepController
 import APIServer
-import ReqHandler
+import reqHandler
 import NodeController
 import Scheduler
 
@@ -30,17 +30,17 @@ commands = instructions.readlines()
 for command in commands:
 	cmdAttributes = command.split()
 	with etcdLock:
-    	if cmdAttributes[0] = 'Deploy':
-    		apiServer.CreateDeployment(cmdAttributes[1:])
-    	elif cmdAttributes[0] = 'AddNode':
-    		apiServer.CreateWorker(cmdAttributes[1:])
-    	elif cmdAttributes[0] = 'CrashPod':
-    		apiServer.CrashPod(cmdAttributes[1:])
-    	elif cmdAttributes[0] = 'DeleteDeployment':
-    		apiServer.RemoveDeployment(cmdAttributes[1:])
-    	elif cmdAttributes[0] = 'ReqIn':
-    		apiServer.PushReq(cmdAttributes[1:])
-    time.sleep(5)
+		if cmdAttributes[0] == 'Deploy':
+			apiServer.CreateDeployment(cmdAttributes[1:])
+		elif cmdAttributes[0] == 'AddNode':
+			apiServer.CreateWorker(cmdAttributes[1:])
+		elif cmdAttributes[0] == 'CrashPod':
+			apiServer.CrashPod(cmdAttributes[1:])
+		elif cmdAttributes[0] == 'DeleteDeployment':
+			apiServer.RemoveDeployment(cmdAttributes[1:])
+		elif cmdAttributes[0] == 'ReqIn':
+			apiServer.PushReq(cmdAttributes[1:])
+		time.sleep(5)
     
 reqHandler.stop()
 depController.stop()

@@ -129,11 +129,17 @@ class APIServer():
 			pod.status = "FAILED"
 	
 #	AssignNode takes a pod in the pendingPodList and transfers it to the internal podList of a specified WorkerNode
+#	It also adjust a worker's available cpu
 	def AssignNode(self, pod, worker):
 
+		#Assign pod
 		self.GetPending().remove(pod)
+		pod.status = "RUNNING"
 		self.GetRunning().append(pod)
 		worker.podList.append(pod)
+
+		#Assign cpu usage
+		worker.availabe_cpu -= pod.assigned_cpu
 
 #	pushReq adds the incoming request to the handling queue	
 	def pushReq(self, info):	

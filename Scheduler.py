@@ -10,10 +10,20 @@ class Scheduler(StoppableThread):
 		StoppableThread.__init__(self)
 		self.apiServer = APIServer
 		
-	def run:
+	def run(self):
 		while true:
 			if self.stopped():
-				break		
+				break
 			with apiServer.etcdLock:
+				#Go through the pending pods
+				for pendingPod in self.apiServer.GetPending():
 
-			time.sleep(LOOPTIME)
+					#Find a node with room, if there is no room it will stay pending
+					for node in self.apiServer.GetWorkers():
+						if (node.available_cpu <= pendingPod.assigned_cpu):
+							self.apiServer.AssignNode(pod, worker)
+							
+							#Create endpoint
+							endpoint = EndPoint(pod, pod.deploymentLabel, worker)
+							GetEndPoints().append(endpoint)
+							break

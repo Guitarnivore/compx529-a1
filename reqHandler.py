@@ -8,9 +8,21 @@ class ReqHandler(StoppableThread):
 		Thread.__init__(self)
 		self.apiServer = APISERVER
 
-	def run():
+	def run(self):
 		while true:
 			if self.stopped():
 				break
 			with apiServer.etcdLock(): #Waits for notification of new request
 				apiServer.etcdLock.wait()
+
+				for request in self.apiServer.GetPendingReqs():
+					endpoints = GetEndPointsByLabel(request.deploymentLabel)
+					requestPlaced = False
+
+					#Block until the request is placed
+					while not requestPlaced:
+						for endpoint in endpoints:
+							if endpoint.pod.available_cpu >= request.cpuCost:
+								endpoint.pod.HandleRequest(request.execTime)
+								self.apiServer.GetPendingReqs().remove(request)
+								requestPlaced = True

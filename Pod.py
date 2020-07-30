@@ -18,6 +18,10 @@ class Pod():
 		self.crash = threading.Event()
 		self.pool = ThreadPoolExecutor(max_workers=ASSIGNED_CPU)
 
-	def HandleRequest(EXECTIME):
-		handling = pool.submit(crash.wait(timeout=EXECTIME))	
+	def HandleRequest(self, CPU_USAGE, EXECTIME):
+		handling = pool.submit(runRequest, CPU_USAGE, EXECTIME)
 		
+	def runRequest(self, CPU_USAGE, EXECTIME):
+		self.available_cpu -= CPU_USAGE
+		crash.wait(timeout=EXECTIME)
+		self.available_cpu += CPU_USAGE

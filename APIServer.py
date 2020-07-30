@@ -33,6 +33,10 @@ class APIServer():
 #	GetEndPoints method returns the list of EndPoints stored in etcd
 	def GetEndPoints(self):
 		return etcd.endPointList;
+
+#	GetPendingRequests returns the list of pending requests.
+	def GetPendingRequests(self):
+		return self.etcd.pendingReqs
 		
 #	CreateWorker creates a WorkerNode from a list of arguments and adds it to the etcd nodeList
 	def CreateWorker(self, info):

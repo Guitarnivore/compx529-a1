@@ -87,7 +87,7 @@ class APIServer():
 #	CheckEndPoint checks that the associated pod is still present on the expected WorkerNode
 	def CheckEndPoint(endPoint):
 
-		return
+		return endPoint.pod in endPoint.node.podList
 	
 #	GetEndPointsByLabel returns a list of EndPoints associated with a given deployment
 	def GetEndPointsByLabel(deploymentLabel):

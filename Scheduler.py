@@ -1,5 +1,5 @@
 import APIServer
-import StoppableThread
+from StoppableThread import StoppableThread
 
 #The Scheduler is a control loop that checks for any pods that have been created
 #but not yet deployed, found in the etcd pendingPodList.
@@ -11,10 +11,10 @@ class Scheduler(StoppableThread):
 		self.apiServer = APIServer
 		
 	def run(self):
-		while true:
+		while True:
 			if self.stopped():
 				break
-			with apiServer.etcdLock:
+			with self.apiServer.etcdLock:
 				#Go through the pending pods
 				for pendingPod in self.apiServer.GetPending():
 

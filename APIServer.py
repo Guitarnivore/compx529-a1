@@ -1,6 +1,6 @@
 import Deployment
 import EndPoint
-import Etcd
+from Etcd import Etcd
 import Pod
 import WorkerNode
 import threading
@@ -11,28 +11,28 @@ import threading
 class APIServer():
 	def __init__(self):
 		self.etcd = Etcd()
-		self.etcdLock = threading.lock()
+		self.etcdLock = threading.Lock()
 		self.kubeletList = [] 
 	
 # 	GetDeployments method returns the list of deployments stored in etcd 	
 	def GetDeployments(self):
-		return etcd.deploymentList;
+		return self.etcd.deploymentList;
 		
 #	GetWorkers method returns the list of WorkerNodes stored in etcd
 	def GetWorkers(self):
-		return etcd.nodeList;
+		return self.etcd.nodeList;
 		
 #	GetPending method returns the list of PendingPods stored in etcd
 	def GetPending(self):
-		return etcd.pendingPodList;
+		return self.etcd.pendingPodList;
 
 #	GetRunning method returns the list of PendingPods stored in etcd
 	def GetRunning(self):
-		return etcd.runningPodList;
+		return self.etcd.runningPodList;
 		
 #	GetEndPoints method returns the list of EndPoints stored in etcd
 	def GetEndPoints(self):
-		return etcd.endPointList;
+		return self.etcd.endPointList;
 
 #	GetPendingRequests returns the list of pending requests.
 	def GetPendingRequests(self):
@@ -147,9 +147,9 @@ class APIServer():
 
 #	pushReq adds the incoming request to the handling queue	
 	def pushReq(self, info):	
-	    etcd.reqCreator.submit(reqHandle, info)
+		self.etcd.reqCreator.submit(reqHandle, info)
 
 #   Creates requests and notifies the handler of request to be dealt with
 	def reqHandle(self, info):
 		self.etcd.pendingReqs.append(Request(info))
-		etcdLock.notify()
+		self.etcdLock.notify()

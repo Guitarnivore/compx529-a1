@@ -15,5 +15,4 @@ class NodeController(StoppableThread):
 			if self.stopped():
 				break
 			with apiServer.etcdLock:
-
-			time.sleep(LOOPTIME)
+				time.sleep(LOOPTIME)

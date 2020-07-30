@@ -1,5 +1,6 @@
 import threading
-import Request
+import time
+from Request import Request
 from DepController import DepController
 from APIServer import APIServer
 from reqHandler import ReqHandler
@@ -40,13 +41,13 @@ for command in commands:
 			apiServer.RemoveDeployment(cmdAttributes[1:])
 		elif cmdAttributes[0] == 'ReqIn':
 			apiServer.PushReq(cmdAttributes[1:])
-		time.sleep(5)
+		time.sleep(1)
     
 reqHandler.stop()
 depController.stop()
 scheduler.stop()
 nodeController.stop()
-reqHandler.Join()
-depController.Join()
-scheduler.Join()
-nodeController.Join()
+reqHandler.join()
+depController.join()
+scheduler.join()
+nodeController.join()

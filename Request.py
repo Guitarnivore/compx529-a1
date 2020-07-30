@@ -1,4 +1,4 @@
-import APIServer
+from APIServer import APIServer
 
 #Requests stress Pod resources for a given period of time to simulate load
 #deploymentLabel is the Deployment that the request is beings sent to
@@ -7,5 +7,5 @@ import APIServer
 class Request():
 	def __init__(self, APISERVER, INFOLIST):
 		self.deploymentLabel = INFOLIST[0]
-		self.cpuCost = INFOLIST[1]
-		self.execTime = INFOLIST[3]
+		self.cpuCost = int(INFOLIST[1])
+		self.execTime = int(INFOLIST[3])

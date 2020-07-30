@@ -11,7 +11,7 @@ import threading
 class Pod():
 	def __init__(self, NAME, ASSIGNED_CPU, ASSIGNED_MEM, AVAILABLE_CPU, AVAILABLE_MEM, DEPLABEL):
 		self.podName = NAME
-		self.assigned_cpu = ASSIGNED_CPU
+		self.assigned_cpu = int(ASSIGNED_CPU)
 		self.available_cpu = self.assigned_cpu
 		self.deploymentLabel = DEPLABEL
 		self.status = "PENDING"

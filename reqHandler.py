@@ -1,4 +1,4 @@
-import APIServer
+from APIServer import APIServer
 from StoppableThread import StoppableThread
 
 #reqHandler is a thread that continuously checks the pendingRequest queue and calls an associated pod to handle the incoming request.
@@ -12,8 +12,8 @@ class ReqHandler(StoppableThread):
 		while True:
 			if self.stopped():
 				break
-			with self.apiServer.etcdLock(): #Waits for notification of new request
-				self.apiServer.etcdLock.wait()
+			with self.apiServer.etcdLock: #Waits for notification of new request
+				self.apiServer.conditionLock.wait()
 
 				for request in self.apiServer.GetPendingReqs():
 					endpoints = GetEndPointsByLabel(request.deploymentLabel)

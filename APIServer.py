@@ -1,8 +1,8 @@
-import Deployment
-import EndPoint
+from Deployment import Deployment
+from EndPoint import EndPoint
 from Etcd import Etcd
-import Pod
-import WorkerNode
+from Pod import Pod
+from WorkerNode import WorkerNode
 import threading
 
 #The APIServer handles the communication between controllers and the cluster. It houses
@@ -12,6 +12,7 @@ class APIServer():
 	def __init__(self):
 		self.etcd = Etcd()
 		self.etcdLock = threading.Lock()
+		self.conditionLock = threading.Condition(self.etcdLock)
 		self.kubeletList = [] 
 	
 # 	GetDeployments method returns the list of deployments stored in etcd 	
@@ -40,24 +41,31 @@ class APIServer():
 		
 #	CreateWorker creates a WorkerNode from a list of arguments and adds it to the etcd nodeList
 	def CreateWorker(self, info):
+		print("Creating worker node...")
 
 		#Create worker node
 		workerNode = WorkerNode(info)
 
 		#Add to node list
 		self.GetWorkers().append(workerNode)
+
+		print("Done.")
 		
 #	CreateDeployment creates a Deployment object from a list of arguments and adds it to the etcd deploymentList
 	def CreateDeployment(self, info):
+		print("Creating deployment...")
 
 		#Create deployment
 		deployment = Deployment(info)
 
 		#Add to deployment list
 		self.GetDeployments().append(deployment)
+		
+		print("Done.")
 
 #	RemoveDeployment deletes the associated Deployment object from etcd and sets the status of all associated pods to 'TERMINATING'
 	def RemoveDeployment(self, deploymentLabel):
+		print("Removing deployment...")
 
 		#Get deployment
 		deployment = next((x for x in self.GetDeployments() if x.deploymentLabel == deploymentLabel), None)
@@ -73,6 +81,8 @@ class APIServer():
 		self.GetDeployments().remove(deployment)
 		for pod in pods:
 			pod.status = "TERMINATING"
+
+		print("Done.")
 
 #	CreateEndpoint creates an EndPoint object using information from a provided Pod and Node (worker) and appends it 
 #	to the endPointList in etcd
@@ -97,6 +107,7 @@ class APIServer():
 	
 #	CreatePod finds the resource allocations associated with a deployment and creates a pod using those metrics
 	def CreatePod(self, deploymentLabel):
+		print("Creating pod...")
 
 		#Get deployment
 		deployment = next((x for x in self.GetDeployments() if x.deploymentLabel == deploymentLabel), None)
@@ -108,6 +119,8 @@ class APIServer():
 		#Create and add pod
 		pod = Pod(name, deployment.cpuCost, 1, 1, 1, deploymentLabel)
 		self.GetPending().append(pod)
+
+		print("Done.")
 	
 #	GetPod returns the pod object stored in the internal podList of a WorkerNode
 	def GetPod(self, endPoint):
@@ -135,6 +148,7 @@ class APIServer():
 #	AssignNode takes a pod in the pendingPodList and transfers it to the internal podList of a specified WorkerNode
 #	It also adjust a worker's available cpu
 	def AssignNode(self, pod, worker):
+		print("Assigning", pod.podName, "to", worker.label, "...", sep=' ')
 
 		#Assign pod
 		self.GetPending().remove(pod)
@@ -143,13 +157,15 @@ class APIServer():
 		worker.podList.append(pod)
 
 		#Assign cpu usage
-		worker.availabe_cpu -= pod.assigned_cpu
+		worker.available_cpu -= pod.assigned_cpu
+
+		print("Done.")
 
 #	pushReq adds the incoming request to the handling queue	
-	def pushReq(self, info):	
-		self.etcd.reqCreator.submit(reqHandle, info)
+	def PushReq(self, info):	
+		self.etcd.reqCreator.submit(self.ReqHandle, info)
 
 #   Creates requests and notifies the handler of request to be dealt with
-	def reqHandle(self, info):
+	def ReqHandle(self, info):
 		self.etcd.pendingReqs.append(Request(info))
-		self.etcdLock.notify()
+		self.conditionLock.notify()

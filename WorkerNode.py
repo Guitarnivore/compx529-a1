@@ -13,3 +13,4 @@ class WorkerNode():
 		self.assigned_cpu = INFOLIST[1]
 		self.available_cpu = assigned_cpu
 		self.status = 'UP'
+		self.podList = []

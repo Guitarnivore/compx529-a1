@@ -1,7 +1,7 @@
-import Pod
-import Deployment
-import EndPoint
-import WorkerNode
+from Pod import Pod
+from Deployment import Deployment
+from EndPoint import EndPoint
+from WorkerNode import WorkerNode
 import queue
 from concurrent.futures import ThreadPoolExecutor
 import threading

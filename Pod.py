@@ -9,7 +9,7 @@ import threading
 #status is a string that communicates the Pod's availability. ['PENDING','RUNNING', 'TERMINATING', 'FAILED']
 #the pool is the threads that are available for request handling on the pod
 class Pod():
-	def __init__(self, NAME, ASSIGNED_CPU, ASSIGNED_MEM, AVAILABLE_CPU, AVAILABLE_MEM, DEPLABEL):
+	def __init__(self, NAME, ASSIGNED_CPU, AVAILABLE_CPU, DEPLABEL):
 		self.podName = NAME
 		self.assigned_cpu = int(ASSIGNED_CPU)
 		self.available_cpu = self.assigned_cpu
@@ -19,9 +19,11 @@ class Pod():
 		self.pool = ThreadPoolExecutor(max_workers=ASSIGNED_CPU)
 
 	def HandleRequest(self, CPU_USAGE, EXECTIME):
-		handling = pool.submit(runRequest, CPU_USAGE, EXECTIME)
+		handling = self.pool.submit(self.runRequest, CPU_USAGE, EXECTIME)
 		
 	def runRequest(self, CPU_USAGE, EXECTIME):
+		print(self.podName, "running request for", EXECTIME, "seconds...")
 		self.available_cpu -= CPU_USAGE
-		crash.wait(timeout=EXECTIME)
+		self.crash.wait(timeout=EXECTIME)
 		self.available_cpu += CPU_USAGE
+		print(self.podName, "request complete.")

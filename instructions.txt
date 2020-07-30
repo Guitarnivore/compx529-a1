@@ -1,3 +1,3 @@
 AddNode node1 5
-Deploy deployA 3 5
-ReqIn req1 deployA 500
+Deploy deployA 1 1
+ReqIn req1 deployA 1 20

@@ -18,13 +18,16 @@ class Scheduler(StoppableThread):
 			with self.apiServer.etcdLock:
 				#Go through the pending pods
 				for pendingPod in self.apiServer.GetPending():
+					print("Starting pending pod...")
 
 					#Find a node with room, if there is no room it will stay pending
 					for node in self.apiServer.GetWorkers():
-						if (node.available_cpu <= pendingPod.assigned_cpu):
+						if (node.available_cpu >= pendingPod.assigned_cpu):
 							self.apiServer.AssignNode(pendingPod, node)
-							
+
 							#Create endpoint
-							endpoint = EndPoint(pendingPod, pendingPod.deploymentLabel, node)
-							self.apiServer.GetEndPoints().append(endpoint)
+							self.apiServer.CreateEndPoint(pendingPod, node)
+							print("Pod started on", node.label)
 							break
+					else:
+						print("Unable to start pod. It remains pending.")

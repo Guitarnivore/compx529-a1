@@ -18,13 +18,13 @@ class NodeController(StoppableThread):
 				for worker in self.apiServer.GetWorkers():
 
 					#Handle failed
-					if worker.status == 'FAILED':
-						worker.status = 'UP'
+					if worker.status == "FAILED":
+						worker.status = "UP"
 
 				#Check endpoints
 				for endpoint in self.apiServer.GetEndPoints():
 					if not self.apiServer.CheckEndPoint(endpoint):
-						
+						print("Incorrect endpoint for", enpoint.node)
 						#Find worker the pod is on and update endpoint
 						for worker in self.apiServer.GetWorkers():
 							if (endpoint.pod in worker.podList):

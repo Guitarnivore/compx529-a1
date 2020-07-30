@@ -3,6 +3,7 @@ from EndPoint import EndPoint
 from Etcd import Etcd
 from Pod import Pod
 from WorkerNode import WorkerNode
+from Request import Request
 import threading
 
 #The APIServer handles the communication between controllers and the cluster. It houses
@@ -11,8 +12,7 @@ import threading
 class APIServer():
 	def __init__(self):
 		self.etcd = Etcd()
-		self.etcdLock = threading.Lock()
-		self.conditionLock = threading.Condition(self.etcdLock)
+		self.etcdLock = threading.Condition()
 		self.kubeletList = [] 
 	
 # 	GetDeployments method returns the list of deployments stored in etcd 	
@@ -49,7 +49,7 @@ class APIServer():
 		#Add to node list
 		self.GetWorkers().append(workerNode)
 
-		print("Done.")
+		print("Done. Current workers =", len(self.GetWorkers()), sep=' ')
 		
 #	CreateDeployment creates a Deployment object from a list of arguments and adds it to the etcd deploymentList
 	def CreateDeployment(self, info):
@@ -61,7 +61,7 @@ class APIServer():
 		#Add to deployment list
 		self.GetDeployments().append(deployment)
 		
-		print("Done.")
+		print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
 
 #	RemoveDeployment deletes the associated Deployment object from etcd and sets the status of all associated pods to 'TERMINATING'
 	def RemoveDeployment(self, deploymentLabel):
@@ -82,17 +82,20 @@ class APIServer():
 		for pod in pods:
 			pod.status = "TERMINATING"
 
-		print("Done.")
+		print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
 
 #	CreateEndpoint creates an EndPoint object using information from a provided Pod and Node (worker) and appends it 
 #	to the endPointList in etcd
 	def CreateEndPoint(self, pod, worker):
+		print("Creating endpoint...")
 
 		#Create endpoint
 		endpoint = EndPoint(pod, pod.deploymentLabel, worker)
 
 		#Add to endpoint list 
 		self.GetEndPoints().append(endpoint)
+
+		print("Done. Current endpoints =", len(self.GetEndPoints()), sep=' ')
 	    
 #	CheckEndPoint checks that the associated pod is still present on the expected WorkerNode
 	def CheckEndPoint(self, endPoint):
@@ -117,10 +120,10 @@ class APIServer():
 		name = deploymentLabel + str(deployment.currentReplicas)
 
 		#Create and add pod
-		pod = Pod(name, deployment.cpuCost, 1, 1, 1, deploymentLabel)
+		pod = Pod(name, deployment.cpuCost, deployment.cpuCost, deploymentLabel)
 		self.GetPending().append(pod)
 
-		print("Done.")
+		print("Done. Current pending pods =", len(self.GetPending()), sep=' ')
 	
 #	GetPod returns the pod object stored in the internal podList of a WorkerNode
 	def GetPod(self, endPoint):
@@ -167,5 +170,8 @@ class APIServer():
 
 #   Creates requests and notifies the handler of request to be dealt with
 	def ReqHandle(self, info):
-		self.etcd.pendingReqs.append(Request(info))
-		self.conditionLock.notify()
+		print("Appending request")
+		request = Request(info)
+		with self.etcdLock:
+			self.GetPendingRequests().append(request)
+			self.etcdLock.notify()

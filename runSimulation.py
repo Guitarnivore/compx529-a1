@@ -24,8 +24,6 @@ nodeController.start()
 depController.start()
 scheduler.start()
 
-
-
 instructions = open("instructions.txt", "r")
 commands = instructions.readlines()
 for command in commands:
@@ -41,13 +39,14 @@ for command in commands:
 			apiServer.RemoveDeployment(cmdAttributes[1:])
 		elif cmdAttributes[0] == 'ReqIn':
 			apiServer.PushReq(cmdAttributes[1:])
-		time.sleep(1)
-    
-reqHandler.stop()
-depController.stop()
-scheduler.stop()
-nodeController.stop()
-reqHandler.join()
-depController.join()
-scheduler.join()
-nodeController.join()
+		time.sleep(2)
+while True:
+	pass
+# reqHandler.stop()
+# depController.stop()
+# scheduler.stop()
+# nodeController.stop()
+# reqHandler.join()
+# depController.join()
+# scheduler.join()
+# nodeController.join()

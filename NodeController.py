@@ -15,4 +15,18 @@ class NodeController(StoppableThread):
 			if self.stopped():
 				break
 			with apiServer.etcdLock:
-				time.sleep(LOOPTIME)
+				for worker in apiServer.GetWorkers():
+
+					#Handle failed
+					if worker.status == 'FAILED':
+						worker.status = 'UP'
+
+				#Check endpoints
+				for endpoint in apiServer.GetEndPoints():
+					if not apiServer.CheckEndPoint(endpoint):
+						
+						#Find worker the pod is on and update endpoint
+						for worker in apiServer.GetWorkers():
+							if (endpoint.pod in worker.podList):
+								endpoint.node = worker
+								break

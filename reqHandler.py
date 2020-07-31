@@ -9,9 +9,7 @@ class ReqHandler(StoppableThread):
 		self.apiServer = APISERVER
 
 	def run(self):
-		while True:
-			if self.stopped():
-				break
+		while not self.stopped():
 			with self.apiServer.etcdLock: #Waits for notification of new request
 				self.apiServer.etcdLock.wait_for(self.requestsWaiting)
 
@@ -21,10 +19,12 @@ class ReqHandler(StoppableThread):
 					requestPlaced = False
 
 					for endpoint in endpoints:
-						if endpoint.pod.available_cpu >= request.cpuCost:
+						if endpoint.pod.available_cpu >= request.cpuCost and endpoint.pod.status == "RUNNING":
 							self.apiServer.GetPendingRequests().remove(request)
 							print("Performing request...")
 							endpoint.pod.HandleRequest(request.cpuCost, request.execTime)
+
+		print("Request handler stopped.")
 
 	def requestsWaiting(self):
 		return len(self.apiServer.GetPendingRequests()) > 0

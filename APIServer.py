@@ -100,7 +100,7 @@ class APIServer():
 #	CheckEndPoint checks that the associated pod is still present on the expected WorkerNode
 	def CheckEndPoint(self, endPoint):
 
-		return endPoint.pod in endPoint.node.podList
+		return True
 	
 #	GetEndPointsByLabel returns a list of EndPoints associated with a given deployment
 	def GetEndPointsByLabel(self, deploymentLabel):
@@ -125,11 +125,10 @@ class APIServer():
 
 		print("Done. Current pending pods =", len(self.GetPending()), sep=' ')
 	
-#	GetPod returns the pod object stored in the internal podList of a WorkerNode
+#	GetPod returns the pod object stored in the endPoint
 	def GetPod(self, endPoint):
 
-		#Return the pod if it is in the node's pod lst otherwise None
-		return next((x for x in endPoint.node.podList if endPoint.pod == x), None)
+		return endPoint.pod
 	
 #	TerminatePod finds the pod associated with a given EndPoint and sets it's status to 'TERMINATING'
 #	No new requests will be sent to a pod marked 'TERMINATING'. Once its current requests have been handled,
@@ -142,11 +141,18 @@ class APIServer():
 #	CrashPod finds a pod from a given deployment and sets its status to 'FAILED'
 #	Any resource utilisation on the pod will be reset to the base 0
 	def CrashPod(self, depLabel):
+		#Extract depLabel from array
+		depLabel = depLabel[0]
 
+		print("Crashing pod...")
 		#Find the first pod in the deployment and fail it
 		pod = next((x for x in self.GetRunning() if x.deploymentLabel == depLabel), None)
+		
 		if pod != None:
 			pod.status = "FAILED"
+			print("Crashed", pod.podName)
+		else:
+			print("No pods live to crash.")
 	
 #	AssignNode takes a pod in the pendingPodList and transfers it to the internal podList of a specified WorkerNode
 #	It also adjust a worker's available cpu
@@ -157,7 +163,8 @@ class APIServer():
 		self.GetPending().remove(pod)
 		pod.status = "RUNNING"
 		self.GetRunning().append(pod)
-		worker.podList.append(pod)
+
+		print("Pending pod", pod.podName, "is now running. Total running pod =", len(self.GetRunning()))
 
 		#Assign cpu usage
 		worker.available_cpu -= pod.assigned_cpu

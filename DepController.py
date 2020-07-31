@@ -1,5 +1,6 @@
 from APIServer import APIServer
 from StoppableThread import StoppableThread
+import time
 
 
 #DepController is a control loop that creates and terminates Pod objects based on
@@ -9,11 +10,10 @@ class DepController(StoppableThread):
 	def __init__(self, APISERVER, LOOPTIME):
 		StoppableThread.__init__(self)
 		self.apiServer = APISERVER
+		self.loopTime = LOOPTIME
 	
 	def run(self):
-		while True:
-			if self.stopped():
-				break
+		while not self.stopped():
 			with self.apiServer.etcdLock:
 				
 				#Check number of pods
@@ -34,4 +34,6 @@ class DepController(StoppableThread):
 					elif replicasRequired > 0:
 						for i in range(0, replicasRequired):
 							self.apiServer.CreatePod(deployment.deploymentLabel)
-					
+							
+			time.sleep(self.loopTime)
+		print("Deployment controller stopped.")

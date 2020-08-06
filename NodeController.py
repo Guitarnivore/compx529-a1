@@ -6,12 +6,12 @@ import time
 #NodeController is a control loop that monitors the status of WorkerNode objects in the cluster and ensures that the EndPoint objects stored in etcd are up to date.
 #The NodeController will remove stale EndPoints and update to show changes in others
 class NodeController(StoppableThread):
-	
+
 	def __init__(self, APISERVER, LOOPTIME):
 		StoppableThread.__init__(self)
 		self.apiServer = APISERVER
 		self.loopTime = LOOPTIME
-	
+
 	def run(self):
 		while not self.stopped():
 			with self.apiServer.etcdLock:
@@ -21,13 +21,21 @@ class NodeController(StoppableThread):
 					if pod.status == "FAILED":
 						print("Restarting pod...")
 						pod.status = "RUNNING"
+						pod.available_cpu = pod.assigned_cpu
 
 					if not self.apiServer.CheckEndPoint(endpoint):
-						print("Incorrect endpoint for", enpoint.node)
-						#Find worker the pod is on and update endpoint
-						for worker in self.apiServer.GetWorkers():
-							pass
+						print("Incorrect endpoint")
+
+						deploymentLabel = endpoint.deploymentLabel
+
+						#Get all associated pods
+						pods = filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetRunning())
+						pods.extend(filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetPending()))
+
+						for pod in pods:
+							pod.status = "TERMINATING"
+
 
 			time.sleep(self.loopTime)
-		
+
 		print("Node controller is finished.")

@@ -1,4 +1,6 @@
 AddNode node1 5
-Deploy deployA 1 1
-ReqIn req1 deployA 1 20
-CrashPod deployA
+AddNode node2 10
+Deploy deployA 1 5
+ReqIn req1 deployA 2 10
+ReqIn req2 deployA 3 9
+ReqIn req3 deployA 1 8

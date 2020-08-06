@@ -40,7 +40,7 @@ for command in commands:
 		elif cmdAttributes[0] == 'ReqIn':
 			apiServer.PushReq(cmdAttributes[1:])
 		time.sleep(5)
-		
+
 # reqHandler.stop()
 # depController.stop()
 # scheduler.stop()

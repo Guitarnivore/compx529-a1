@@ -39,6 +39,8 @@ for command in commands:
 			apiServer.RemoveDeployment(cmdAttributes[1:])
 		elif cmdAttributes[0] == 'ReqIn':
 			apiServer.PushReq(cmdAttributes[1:])
+		elif cmdAttributes[0] == 'Sleep':
+			time.sleep(int(cmdAttributes[1]))
 		time.sleep(5)
 
 reqHandler.stop()

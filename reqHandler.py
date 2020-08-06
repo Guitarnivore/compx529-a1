@@ -15,11 +15,11 @@ class ReqHandler(StoppableThread):
 
 				request = self.apiServer.GetPendingRequests()[0]
 
-				endpoint = self.apiServer.GetEndPointsByLabel(request.deploymentLabel)[0]
-
-				self.apiServer.GetPendingRequests().remove(request)
-				print("Performing request...")
-				endpoint.pod.HandleRequest(request.cpuCost, request.execTime)
+				endpoints = self.apiServer.GetEndPointsByLabel(request.deploymentLabel)
+				if len(endpoints) > 0:
+					self.apiServer.GetPendingRequests().remove(request)
+					print("Performing request...")
+					endpoints[0].pod.HandleRequest(request.cpuCost, request.execTime)
 
 		print("Request handler stopped.")
 

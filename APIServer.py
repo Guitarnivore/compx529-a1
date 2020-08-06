@@ -77,6 +77,13 @@ class APIServer():
 		self.GetDeployments().remove(deployment)
 		print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
 
+		#Get all associated pods
+		pods = filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetRunning())
+		pods.extend(filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetPending()))
+
+		for pod in pods:
+			pod.status = "TERMINATING"
+
 #	CreateEndpoint creates an EndPoint object using information from a provided Pod and Node (worker) and appends it
 #	to the endPointList in etcd
 	def CreateEndPoint(self, pod, worker):
@@ -93,7 +100,7 @@ class APIServer():
 #	CheckEndPoint checks that the associated pod is still present on the expected WorkerNode
 	def CheckEndPoint(self, endPoint):
 
-		return any(d for d in self.GetDeployments() if endpoint.deploymentLabel == d.deploymentLabel)
+		return any(d for d in self.GetDeployments() if endPoint.deploymentLabel == d.deploymentLabel)
 
 #	GetEndPointsByLabel returns a list of EndPoints associated with a given deployment
 	def GetEndPointsByLabel(self, deploymentLabel):

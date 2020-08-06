@@ -4,3 +4,4 @@ Deploy deployA 1 5
 ReqIn req1 deployA 2 10
 ReqIn req2 deployA 3 9
 ReqIn req3 deployA 1 8
+DeleteDeployment deployA

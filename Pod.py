@@ -22,6 +22,7 @@ class Pod():
 		handling = self.pool.submit(self.runRequest, CPU_USAGE, EXECTIME)
 
 	def runRequest(self, CPU_USAGE, EXECTIME):
+		#Wait for there to be room on the pod and then run the request.
 		while True:
 			if self.available_cpu >= CPU_USAGE:
 				print(self.podName, "running request for", EXECTIME, "seconds...")

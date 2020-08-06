@@ -25,15 +25,7 @@ class NodeController(StoppableThread):
 
 					if not self.apiServer.CheckEndPoint(endpoint):
 						print("Incorrect endpoint")
-
-						deploymentLabel = endpoint.deploymentLabel
-
-						#Get all associated pods
-						pods = filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetRunning())
-						pods.extend(filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetPending()))
-
-						for pod in pods:
-							pod.status = "TERMINATING"
+						self.apiServer.GetEndPoints().remove(endpoint)
 
 
 			time.sleep(self.loopTime)

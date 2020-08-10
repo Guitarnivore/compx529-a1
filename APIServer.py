@@ -55,34 +55,33 @@ class APIServer():
 	def CreateDeployment(self, info):
 		print("Creating deployment...")
 
-		#Create deployment
-		deployment = Deployment(info)
+		#Check if the deployment label already exists
+		if any(x for x in self.GetDeployments() if x.deploymentLabel == info[0]):
+			print("Cannot add deployment, deployment with label", info[0], "already exists.")
+		else:
+			#Create deployment
+			deployment = Deployment(info)
 
-		#Add to deployment list
-		self.GetDeployments().append(deployment)
+			#Add to deployment list
+			self.GetDeployments().append(deployment)
 
-		print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
+			print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
 
 #	RemoveDeployment deletes the associated Deployment object from etcd and sets the status of all associated pods to 'TERMINATING'
 	def RemoveDeployment(self, deploymentLabel):
 		print("Removing deployment...")
 
+		depLabel = deploymentLabel[0]
+
 		#Get deployment
-		deployment = next((x for x in self.GetDeployments() if x.deploymentLabel == deploymentLabel), None)
+		deployment = next((x for x in self.GetDeployments() if x.deploymentLabel == depLabel), None)
 		#Return if the deployment doesn't exist
 		if (deployment == None):
+			print("Cannot find deployment.")
 			return
 
-		#Remove deployment and set all pods to terminating
-		self.GetDeployments().remove(deployment)
-		print("Done. Current deployments =", len(self.GetDeployments()), sep=' ')
-
-		#Get all associated pods
-		pods = filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetRunning())
-		pods.extend(filter(lambda x: x.deploymentLabel == deploymentLabel, self.GetPending()))
-
-		for pod in pods:
-			pod.status = "TERMINATING"
+		#Set expected replicas to 0, deployment controller will remove deployment
+		deployment.expectedReplicas = 0
 
 #	CreateEndpoint creates an EndPoint object using information from a provided Pod and Node (worker) and appends it
 #	to the endPointList in etcd
@@ -96,11 +95,6 @@ class APIServer():
 		self.GetEndPoints().append(endpoint)
 
 		print("Done. Current endpoints =", len(self.GetEndPoints()), sep=' ')
-
-#	CheckEndPoint checks that the associated pod is still present on the expected WorkerNode
-	def CheckEndPoint(self, endPoint):
-
-		return any(d for d in self.GetDeployments() if endPoint.deploymentLabel == d.deploymentLabel)
 
 #	GetEndPointsByLabel returns a list of EndPoints associated with a given deployment
 	def GetEndPointsByLabel(self, deploymentLabel):
@@ -151,14 +145,14 @@ class APIServer():
 		if pod != None:
 			pod.status = "FAILED"
 			pod.available_cpu = 0
-			print("Crashed", pod.podName)
+			print("Crashed pod", pod.podName)
 		else:
 			print("No pods live to crash.")
 
 #	AssignNode takes a pod in the pendingPodList and transfers it to the internal podList of a specified WorkerNode
 #	It also adjust a worker's available cpu
 	def AssignNode(self, pod, worker):
-		print("Assigning", pod.podName, "to", worker.label, "...", sep=' ')
+		print("Assigning pod", pod.podName, "to node", worker.label, "...", sep=' ')
 
 		#Assign pod
 		self.GetPending().remove(pod)

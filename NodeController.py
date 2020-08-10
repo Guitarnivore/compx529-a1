@@ -20,13 +20,27 @@ class NodeController(StoppableThread):
 					pod = self.apiServer.GetPod(endpoint)
 					if pod.status == "FAILED":
 						print("Restarting pod...")
-						pod.status = "RUNNING"
-						pod.available_cpu = pod.assigned_cpu
 
-					if not self.apiServer.CheckEndPoint(endpoint):
-						print("Incorrect endpoint")
+						#Put pod back pending
+						pod.status = "PENDING"
+						self.apiServer.GetPending().append(pod)
+						self.apiServer.GetRunning().remove(pod)
+
+						#Free up node resources
+						endpoint.node.available_cpu += pod.assigned_cpu
 						self.apiServer.GetEndPoints().remove(endpoint)
 
+					if pod.status == "TERMINATING":
+
+						print("Ending pod.")
+
+						self.apiServer.GetRunning().remove(pod)
+
+						pod.pool.shutdown()
+
+						#Free up node resources
+						endpoint.node.available_cpu += pod.assigned_cpu
+						self.apiServer.GetEndPoints().remove(endpoint)
 
 			time.sleep(self.loopTime)
 

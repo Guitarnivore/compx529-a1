@@ -56,7 +56,7 @@ for x in range (1, commandCount+1): #Generates a set number of commands
 			depA +=1
 		deployment = "".join(["Deployment_",depLabel])
 		command = separator.join([choice, deployment, str(cpus), "1"])
-		deployments.append(deployment)	
+		deployments.append(deployment)
 	if choice == "ReqIn":
 		deployment = random.choice(deployments)
 		reqTime = random.randint(1,10)
@@ -72,6 +72,6 @@ for x in range (1, commandCount+1): #Generates a set number of commands
 		sleepTime = random.randint(1,5)
 		command = separator.join([choice, str(sleepTime)])
 	f.write(command+"\n")
-	
+
 for deployment in deployments:
 	f.write ("DeleteDeployment "+deployment+"\n")

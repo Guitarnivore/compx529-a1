@@ -13,8 +13,3 @@ class StoppableThread(threading.Thread):
 
     def stopped(self):
         return self._stop_event.is_set()
-
-    def join(self):
-        #Clear stop event so that join() means it continues to run.
-        self._stop_event.clear()
-        super.join()

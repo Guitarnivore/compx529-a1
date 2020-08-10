@@ -10,9 +10,9 @@ from Scheduler import Scheduler
 #This is the simulation frontend that will interact with your APIServer to change cluster configurations and handle requests
 #All building files are guidelines, and you are welcome to change them as much as desired so long as the required functionality is still implemented.
 
-_nodeCtlLoop = 5
-_depCtlLoop = 5
-_scheduleCtlLoop =5
+_nodeCtlLoop = 0
+_depCtlLoop = 0
+_scheduleCtlLoop = 0
 
 apiServer = APIServer()
 depController = DepController(apiServer, _depCtlLoop)
@@ -41,13 +41,13 @@ for command in commands:
 			apiServer.PushReq(cmdAttributes[1:])
 		elif cmdAttributes[0] == 'Sleep':
 			time.sleep(int(cmdAttributes[1]))
-		time.sleep(5)
+	time.sleep(1)
 
 reqHandler.stop()
 depController.stop()
 scheduler.stop()
 nodeController.stop()
-reqHandler.join()
-depController.join()
-scheduler.join()
-nodeController.join()
+
+#Notify to finish the controller
+with apiServer.etcdLock:
+	apiServer.etcdLock.notify()

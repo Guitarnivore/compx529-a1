@@ -9,5 +9,5 @@ class Deployment():
 	def __init__(self, INFOLIST):
 		self.deploymentLabel = INFOLIST[0]
 		self.currentReplicas = 0
-		self.expectedReplicas = int(INFOLIST[1])
-		self.cpuCost = int(INFOLIST[2])
+		self.cpuCost = int(INFOLIST[1])
+		self.expectedReplicas = int(INFOLIST[2])

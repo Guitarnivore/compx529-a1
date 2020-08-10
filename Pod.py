@@ -16,18 +16,15 @@ class Pod():
 		self.deploymentLabel = DEPLABEL
 		self.status = "PENDING"
 		self.crash = threading.Event()
-		self.pool = ThreadPoolExecutor(max_workers=ASSIGNED_CPU)
+		self.pool = ThreadPoolExecutor(max_workers=self.assigned_cpu)
 
-	def HandleRequest(self, CPU_USAGE, EXECTIME):
-		handling = self.pool.submit(self.runRequest, CPU_USAGE, EXECTIME)
+	def HandleRequest(self, EXECTIME):
+		handling = self.pool.submit(self.runRequest, EXECTIME)
 
-	def runRequest(self, CPU_USAGE, EXECTIME):
-		#Wait for there to be room on the pod and then run the request.
-		while True:
-			if self.available_cpu >= CPU_USAGE:
-				print(self.podName, "running request for", EXECTIME, "seconds...")
-				self.available_cpu -= CPU_USAGE
-				self.crash.wait(timeout=EXECTIME)
-				self.available_cpu += CPU_USAGE
-				print(self.podName, "request complete.")
-				break
+	def runRequest(self, EXECTIME):
+		#Run the request
+		print(self.podName, "running request for", EXECTIME, "seconds...")
+		self.available_cpu -= 1
+		self.crash.wait(timeout=EXECTIME)
+		self.available_cpu += 1
+		print(self.podName, "request complete.")

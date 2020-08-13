@@ -131,6 +131,11 @@ class APIServer():
 
 		#Set the endpoint's pod status to 'TERMINATING'
 		endPoint.pod.status = "TERMINATING"
+		
+		deployment = next((x for x in self.GetDeployments() if x.deploymentLabel == endPoint.deploymentLabel), None)
+		if deployment != None:
+			deployment.currentReplicas -= 1
+
 
 #	CrashPod finds a pod from a given deployment and sets its status to 'FAILED'
 #	Any resource utilisation on the pod will be reset to the base 0

@@ -7,6 +7,8 @@ class ReqHandler(StoppableThread):
 	def __init__(self, APISERVER):
 		StoppableThread.__init__(self)
 		self.apiServer = APISERVER
+		self.requestsFailed = []
+		self.requestsSucceeded = []
 
 	def run(self):
 		while not self.stopped():
@@ -22,9 +24,12 @@ class ReqHandler(StoppableThread):
 						print("Performing request...")
 						if endpoints[0].pod.status == "RUNNING":
 							endpoints[0].pod.HandleRequest(request.execTime)
+							self.requestsSucceeded[len(self.apiServer.GetDeployments())-1] += 1
 						else:
+							self.requestsFailed[len(self.apiServer.GetDeployments())-1] += 1
 							print("No running pod to perform request.")
 					else:
+						self.requestsFailed[len(self.apiServer.GetDeployments())-1] += 1
 						print("No active endpoint to perform request.")
 
 		print("Request handler stopped.")
